@@ -19,7 +19,8 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/alberto/GIC/rastreadorarchivos"
+	"github.com/AlbertoNoviembre/GIC/generadorexcel"
+	"github.com/AlbertoNoviembre/GIC/rastreadorarchivos"
 	"github.com/tawesoft/golib/v2/dialog"
 	"github.com/zcalusic/sysinfo"
 )

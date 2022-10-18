@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alberto/GIC/rastreadorarchivos"
+	"github.com/AlbertoNoviembre/GIC/rastreadorarchivos"
 	"github.com/xuri/excelize/v2"
 )
 
