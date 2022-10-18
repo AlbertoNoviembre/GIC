@@ -1,7 +1,6 @@
 package main
 
 import (
-	"GIC/generadorexcel"
 	"fmt"
 	"image/color"
 	"io/ioutil"
