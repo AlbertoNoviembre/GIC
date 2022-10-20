@@ -20,6 +20,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/AlbertoNoviembre/GIC/generadorexcel"
 	"github.com/AlbertoNoviembre/GIC/rastreadorarchivos"
+	"github.com/AlbertoNoviembre/GIC/usodisco"
 	"github.com/tawesoft/golib/v2/dialog"
 	"github.com/zcalusic/sysinfo"
 )
@@ -33,6 +34,7 @@ var ruta string
 var disp_selec string
 var ruta_slice []string
 var progreso float64
+var infoDisco usodisco.EstadoDispAlmac
 
 func main() {
 
@@ -53,6 +55,15 @@ func main() {
 
 	lbl_lista_disp := widget.NewLabel("DISPOSITIVOS MONTADOS:")
 	lbl_lista_disp.Alignment = fyne.TextAlign(1)
+
+	lista := widget.NewListWithData(data,
+		func() fyne.CanvasObject {
+			return widget.NewLabel("template")
+		},
+		func(i binding.DataItem, o fyne.CanvasObject) {
+			o.(*widget.Label).Bind(i.(binding.String))
+
+		})
 
 	btn_gpdf := widget.NewButton("Generar archivo PDF", func() {})
 
@@ -115,7 +126,7 @@ func main() {
 
 	})
 
-	radbox_tipos_archivo := widget.NewRadioGroup([]string{"Todos los archivos", "Archivos de Vídeo", "Archivos de Audio"}, func(seleccionado string) {
+	radbox_tipos_archivo := widget.NewRadioGroup([]string{"Todos los archivos", "Archivos de Vídeo", "Archivos de Audio", "Audio y Vídeo"}, func(seleccionado string) {
 
 		//dialog.Info("Has seleccionado: " + seleccionado)
 
@@ -133,26 +144,30 @@ func main() {
 
 			rastreadorarchivos.Opc_tipos = 3
 
+		case "Audio y Vídeo":
+
+			rastreadorarchivos.Opc_tipos = 4
+
 		}
 
 	})
 
+	radbox_tipos_archivo.SetSelected("Todos los archivos")
+
 	btn_salir := widget.NewButton("Salir", func() { os.Exit(0) })
-
-	lista := widget.NewListWithData(data,
-		func() fyne.CanvasObject {
-			return widget.NewLabel("template")
-		},
-		func(i binding.DataItem, o fyne.CanvasObject) {
-			o.(*widget.Label).Bind(i.(binding.String))
-
-		})
 
 	btn_gExcel.Disable()
 
 	lista.OnSelected = func(id int) {
 		fmt.Println(disps[id])
 		disp_selec = disps[id]
+
+		ruta += "/" + disp_selec
+		infoDisco = usodisco.UsoDispAlmac(&ruta)
+
+		fmt.Printf("Total: %.2f GB\nUsado: %.2f GB\nLibre: %.2f GB\n\n", float64(infoDisco.Total)/float64(usodisco.GB),
+			float64(infoDisco.Usado)/float64(usodisco.GB),
+			float64(infoDisco.Libre)/float64(usodisco.GB))
 		btn_gExcel.Enable()
 	}
 
@@ -182,7 +197,7 @@ func main() {
 	cuadro_progreso.StrokeColor = color.White
 	cuadro_progreso.StrokeWidth = 0.5
 
-	radbox_tipos_archivo.Move(fyne.NewPos(260, 180))
+	radbox_tipos_archivo.Move(fyne.NewPos(265, 115))
 	radbox_tipos_archivo.Resize(fyne.NewSize(200, 100))
 
 	contenido := container.NewWithoutLayout(cuadro_lista, cuadro_controles, cuadro_progreso, lbl_lista_disp,
@@ -197,8 +212,7 @@ func main() {
 	btn_gExcel.Resize(fyne.NewSize(200, 50))
 	barra_de_progreso.Move(fyne.NewPos(10, 355))
 	barra_de_progreso.Resize(fyne.NewSize(460, 35))
-
-	btn_salir.Move(fyne.NewPos(260, btn_gExcel.MinSize().Height+80))
+	btn_salir.Move(fyne.NewPos(260, btn_gExcel.MinSize().Height+245))
 	btn_salir.Resize(fyne.NewSize(200, 50))
 
 	w.SetContent(contenido)
@@ -207,10 +221,6 @@ func main() {
 	w.SetFixedSize(true)
 	w.ShowAndRun()
 	w.Content().Refresh()
-
-}
-
-func iniciarWidgets() {
 
 }
 

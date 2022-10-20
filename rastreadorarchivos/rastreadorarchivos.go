@@ -56,6 +56,10 @@ func printFile(path string, info os.FileInfo, opc_tipos int, err error) error {
 
 		slice_formatos = []string{".mp3", ".ogg", ".flac", ".wav"}
 
+	case 4:
+
+		slice_formatos = []string{".avi", ".mp4", ".mkv", ".mpg", "mov", ".mpeg", ".wmv", ".mp3", ".ogg", ".flac", ".wav"}
+
 	}
 
 	var nombre_simp string
