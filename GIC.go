@@ -90,6 +90,7 @@ func main() {
 
 			}
 
+			generadorexcel.EstablecerValoresUsoDisco(float64(infoDisco.Total)/float64(usodisco.GB), float64(infoDisco.Usado)/float64(usodisco.GB), float64(infoDisco.Libre)/float64(usodisco.GB))
 			generadorexcel.CrearArchivo(disp_selec, &rastreadorarchivos.Slice_archivos, getNombreUsuario())
 			rastreadorarchivos.Slice_archivos = make([]rastreadorarchivos.Archivo, 0)
 			barra_de_progreso.Hide()

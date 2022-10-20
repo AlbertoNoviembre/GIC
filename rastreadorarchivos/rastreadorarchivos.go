@@ -103,6 +103,14 @@ func printFile(path string, info os.FileInfo, opc_tipos int, err error) error {
 
 		} else if opc_tipos == 1 {
 
+			slice_ruta_reducido = slice_ruta[n_directorios_ruta_montados : len(slice_ruta)-1]
+
+			for _, elemento := range slice_ruta_reducido {
+
+				archivo.Ruta += string("/" + elemento)
+
+			}
+
 			archivo.Nombre = string(nombre)
 			archivo.Extension = filepath.Ext(path)
 			archivo.Agregar()

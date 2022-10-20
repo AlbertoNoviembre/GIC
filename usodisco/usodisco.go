@@ -26,6 +26,7 @@ func UsoDispAlmac(ruta *string) (Dispositivo EstadoDispAlmac) {
 	Dispositivo.Usado = Dispositivo.Total - Dispositivo.Usado
 
 	return
+
 }
 
 const (

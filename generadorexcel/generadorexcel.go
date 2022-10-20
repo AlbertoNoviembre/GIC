@@ -16,7 +16,16 @@ var borde_celda_simple, borde_celda_grueso []excelize.Border
 var estilo1, estilo2, estilo3, estilo4 excelize.Style
 var slice_todos_disp []rastreadorarchivos.Archivo //Aquí he declarado la variable como tipo SLICE del STRUCT 'Archivo'. Este STRUCT está definido en el paquete
 // rastreadorarchivos
-var n_filas int
+var valor_Total float64
+var valor_Usado float64
+var valor_Libre float64
+
+func EstablecerValoresUsoDisco(total, usado, libre float64) {
+
+	valor_Total = total
+	valor_Usado = usado
+	valor_Libre = libre
+}
 
 func CrearArchivo(nombre string, slice_archivos *[]rastreadorarchivos.Archivo, usuario string) {
 
@@ -40,8 +49,6 @@ func CrearArchivo(nombre string, slice_archivos *[]rastreadorarchivos.Archivo, u
 	}
 
 	for i := 0; i < archivo_excel.SheetCount-1; i++ {
-
-		n_filas += len(*slice_archivos)
 
 		archivo_excel.SetActiveSheet(i)
 
@@ -77,6 +84,20 @@ func crearHoja(nombre string) {
 }
 
 func setEstilos(nombre string, slice_archivos *[]rastreadorarchivos.Archivo) {
+	archivo_excel.SetPanes(nombre, `
+    {
+        "freeze":true,
+        "y_split":3,
+        "top_left_cell":"A5",
+        "active_pane":"bottomRight",
+        "panes":[
+            {"pane":"topLeft"},
+            {"pane":"topRight"},
+            {"pane":"bottomLeft"},
+            {"active_cell":"A4", "sqref":"A4", "pane":"bottomRight"}
+            ]
+    }
+`)
 
 	borde_celda_simple = []excelize.Border{{Type: "left", Color: "000000", Style: 1},
 		{Type: "top", Color: "000000", Style: 1},
@@ -88,50 +109,48 @@ func setEstilos(nombre string, slice_archivos *[]rastreadorarchivos.Archivo) {
 		{Type: "bottom", Color: "000099", Style: 5},
 		{Type: "right", Color: "0000CC", Style: 5}}
 
-	estilo1, err := archivo_excel.NewStyle(&excelize.Style{
-
-		Border:    borde_celda_simple,
-		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#fcf4e3"}, Pattern: 1},
-		Font:      &excelize.Font{Size: 12},
-		Alignment: &excelize.Alignment{Horizontal: "left"},
-	})
-
-	estilo2, err := archivo_excel.NewStyle(&excelize.Style{
+	encabezado, err := archivo_excel.NewStyle(&excelize.Style{
 
 		Border:    borde_celda_grueso,
-		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#DFE8F7", "#ADA6C2", "#8A8290"}, Pattern: 1},
-		Font:      &excelize.Font{Size: 14},
-		Alignment: &excelize.Alignment{Horizontal: "center"},
-	})
-
-	estilo3, err := archivo_excel.NewStyle(&excelize.Style{
-
-		Border:    borde_celda_grueso,
-		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#DFE8F7", "#ADA6C2", "#8A8290"}, Pattern: 1},
-		Font:      &excelize.Font{Size: 18},
-		Alignment: &excelize.Alignment{Horizontal: "center"},
-	})
-
-	estilo4, err := archivo_excel.NewStyle(&excelize.Style{
-
-		Border:    borde_celda_simple,
-		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#d8f2db"}, Pattern: 1},
-		Font:      &excelize.Font{Size: 11},
-		Alignment: &excelize.Alignment{Horizontal: "left"},
-	})
-
-	estilo5, err := archivo_excel.NewStyle(&excelize.Style{
-
-		Border:    borde_celda_grueso,
-		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#DFE8F7", "#ADA6C2", "#8A8290"}, Pattern: 1},
-		Font:      &excelize.Font{Size: 18},
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#081c69"}, Pattern: 1},
+		Font:      &excelize.Font{Size: 22, Color: "#FFFFFF"},
 		Alignment: &excelize.Alignment{Horizontal: "center"},
 		NumFmt:    0,
 	})
 
-	archivo_excel.SetCellStyle(nombre, "C2", "C2", estilo5)
+	encabezado_uso_disco, err := archivo_excel.NewStyle(&excelize.Style{
 
-	archivo_excel.SetCellStyle(nombre, "A2", "B2", estilo2)
+		Border:    borde_celda_grueso,
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#2c3b78"}, Pattern: 1},
+		Font:      &excelize.Font{Size: 22, Color: "#FFFFFF"},
+		Alignment: &excelize.Alignment{Horizontal: "center"},
+		NumFmt:    0,
+	})
+
+	encabezado_titl_ruta, err := archivo_excel.NewStyle(&excelize.Style{
+
+		Border:    borde_celda_grueso,
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#2c365c"}, Pattern: 1},
+		Font:      &excelize.Font{Size: 22, Color: "#FFFFFF"},
+		Alignment: &excelize.Alignment{Horizontal: "center"},
+		NumFmt:    0,
+	})
+
+	columna_nombres_archivos, err := archivo_excel.NewStyle(&excelize.Style{
+
+		Border:    borde_celda_simple,
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#fcf4e3"}, Pattern: 1},
+		Font:      &excelize.Font{Size: 14},
+		Alignment: &excelize.Alignment{Horizontal: "left"},
+	})
+
+	columna_rutas_archivos, err := archivo_excel.NewStyle(&excelize.Style{
+
+		Border:    borde_celda_simple,
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#d8f2db"}, Pattern: 1},
+		Font:      &excelize.Font{Size: 14},
+		Alignment: &excelize.Alignment{Horizontal: "left"},
+	})
 
 	red, err := archivo_excel.NewConditionalStyle(`{
 		
@@ -168,7 +187,7 @@ func setEstilos(nombre string, slice_archivos *[]rastreadorarchivos.Archivo) {
 	
 	]`, red)
 
-	rango := fmt.Sprintf("A%d:A%d", 3, len(slice_todos_disp)+3)
+	rango := fmt.Sprintf("A%d:A%d", 4, len(slice_todos_disp)+4)
 	if err := archivo_excel.SetConditionalFormat(nombre, rango, duplicCond); err != nil {
 
 		fmt.Println(err)
@@ -176,7 +195,7 @@ func setEstilos(nombre string, slice_archivos *[]rastreadorarchivos.Archivo) {
 
 	}
 
-	if archivo_excel.SetCellStyle(nombre, "A1", "B1", estilo3); err != nil {
+	if archivo_excel.SetCellStyle(nombre, "A1", "B1", encabezado); err != nil {
 
 		fmt.Println(err)
 
@@ -184,7 +203,7 @@ func setEstilos(nombre string, slice_archivos *[]rastreadorarchivos.Archivo) {
 
 	}
 
-	if archivo_excel.SetCellStyle(nombre, "A3", "A"+fmt.Sprint(len(*slice_archivos)+2), estilo1); err != nil {
+	if archivo_excel.SetCellStyle(nombre, "A2", "B2", encabezado_uso_disco); err != nil {
 
 		fmt.Println(err)
 
@@ -192,7 +211,7 @@ func setEstilos(nombre string, slice_archivos *[]rastreadorarchivos.Archivo) {
 
 	}
 
-	if archivo_excel.SetCellStyle(nombre, "A3", "A"+fmt.Sprint(len(*slice_archivos)+2), estilo1); err != nil {
+	if archivo_excel.SetCellStyle(nombre, "A3", "B3", encabezado_titl_ruta); err != nil {
 
 		fmt.Println(err)
 
@@ -200,7 +219,23 @@ func setEstilos(nombre string, slice_archivos *[]rastreadorarchivos.Archivo) {
 
 	}
 
-	if archivo_excel.SetCellStyle(nombre, "B3", "B"+fmt.Sprint(len(*slice_archivos)+2), estilo4); err != nil {
+	if archivo_excel.SetCellStyle(nombre, "A4", "A"+fmt.Sprint(len(*slice_archivos)+3), columna_nombres_archivos); err != nil {
+
+		fmt.Println(err)
+
+		return
+
+	}
+
+	if archivo_excel.SetCellStyle(nombre, "A4", "A"+fmt.Sprint(len(*slice_archivos)+3), columna_nombres_archivos); err != nil {
+
+		fmt.Println(err)
+
+		return
+
+	}
+
+	if archivo_excel.SetCellStyle(nombre, "B4", "B"+fmt.Sprint(len(*slice_archivos)+3), columna_rutas_archivos); err != nil {
 
 		fmt.Println(err)
 
@@ -217,15 +252,22 @@ func insertarInfoExcel(nombre string, slice_archivos *[]rastreadorarchivos.Archi
 
 	archivo_excel.SetColWidth(nombre, "A", "A", 100)
 	archivo_excel.SetColWidth(nombre, "B", "B", 120)
-	archivo_excel.SetCellValue(nombre, "A2", "TÍTULO")
-	archivo_excel.SetCellValue(nombre, "B2", "RUTA (CARPETA)")
+	archivo_excel.SetCellValue(nombre, "A3", "TÍTULO")
+	archivo_excel.SetCellValue(nombre, "B3", "RUTA (CARPETA)")
+	archivo_excel.MergeCell(nombre, "A2", "B2")
+	archivo_excel.SetCellValue(nombre, "A2", fmt.Sprintf("Total:%.2f GB    Usado:%.2f GB    Disponible:%.2f GB", valor_Total, valor_Usado, valor_Libre))
 	archivo_excel.SetCellValue(nombre, "C2", len(*slice_archivos))
-
+	archivo_excel.SetCellValue("TODOS LOS DISPOSITIVOS", "A2", "LISTADO DE ARCHIVOS DE TODOS LOS MEDIOS DE ALMACENAMIENTO.")
 	for indice, archivo := range *slice_archivos {
-		col_a = fmt.Sprintf("A%d", indice+3)
-		col_b = fmt.Sprintf("B%d", indice+3)
+		col_a = fmt.Sprintf("A%d", indice+4)
+		col_b = fmt.Sprintf("B%d", indice+4)
 		archivo_excel.SetCellValue(nombre, col_a, strings.ToUpper(archivo.Nombre))
 		archivo_excel.SetCellValue(nombre, col_b, archivo.Ruta)
-
+		archivo_excel.SetRowHeight(nombre, indice, 20)
 	}
+
+	archivo_excel.SetRowHeight(nombre, 1, 25)
+	archivo_excel.SetRowHeight(nombre, 2, 25)
+	archivo_excel.SetRowHeight(nombre, 3, 25)
+
 }
