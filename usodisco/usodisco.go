@@ -23,7 +23,7 @@ func UsoDispAlmac(ruta *string) (Dispositivo EstadoDispAlmac) {
 
 	Dispositivo.Total = sis_archivos.Blocks * uint64(sis_archivos.Bsize)
 	Dispositivo.Libre = sis_archivos.Bfree * uint64(sis_archivos.Bsize)
-	Dispositivo.Usado = Dispositivo.Total - Dispositivo.Usado
+	Dispositivo.Usado = Dispositivo.Total - Dispositivo.Libre
 
 	return
 

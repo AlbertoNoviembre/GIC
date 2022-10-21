@@ -2,6 +2,7 @@ package generadorexcel
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,6 +20,8 @@ var slice_todos_disp []rastreadorarchivos.Archivo //Aquí he declarado la variab
 var valor_Total float64
 var valor_Usado float64
 var valor_Libre float64
+var n_filas int
+var nombre_hoja string
 
 func EstablecerValoresUsoDisco(total, usado, libre float64) {
 
@@ -38,29 +41,70 @@ func CrearArchivo(nombre string, slice_archivos *[]rastreadorarchivos.Archivo, u
 	}
 
 	crearHoja(nombre)
-	crearHoja("TODOS LOS DISPOSITIVOS")
 
 	insertarInfoExcel(nombre, slice_archivos)
-
-	for _, archivo := range *slice_archivos {
-
-		slice_todos_disp = append(slice_todos_disp, archivo)
-
-	}
-
-	for i := 0; i < archivo_excel.SheetCount-1; i++ {
-
-		archivo_excel.SetActiveSheet(i)
-
-		insertarInfoExcel("TODOS LOS DISPOSITIVOS", &slice_todos_disp)
-
-	}
-
 	time.Sleep(time.Second * 1)
 	setEstilos(nombre, slice_archivos)
 	time.Sleep(time.Second * 1)
-	setEstilos("TODOS LOS DISPOSITIVOS", &slice_todos_disp)
+	archivo_excel.DeleteSheet("Sheet1")
+	time.Sleep(time.Second * 1)
+	archivo_excel.DeleteSheet("TODOS LOS DISPOSITIVOS")
+	archivo_excel.Save()
 
+	for _, hoja := range archivo_excel.GetSheetList() {
+
+		valor_celda_C2, err := archivo_excel.GetCellValue(hoja, "C2")
+
+		if err != nil {
+
+			fmt.Println(err)
+			return
+
+		}
+
+		valor_int, err := strconv.Atoi(valor_celda_C2)
+
+		if err != nil {
+
+			fmt.Print("El error es: ")
+			fmt.Println(err)
+			return
+
+		}
+
+		for j := 0; j < valor_int; j++ {
+
+			valor_celda_nombre_archivo, err := archivo_excel.GetCellValue(hoja, fmt.Sprintf("A%d", j+4))
+			if err != nil {
+
+				fmt.Print("¿Está aquí el error?")
+				fmt.Println(err)
+				return
+
+			}
+
+			valor_celda_ruta_archivo, err := archivo_excel.GetCellValue(hoja, fmt.Sprintf("B%d", j+4))
+
+			if err != nil {
+
+				fmt.Println(err)
+				return
+
+			}
+			archivo := rastreadorarchivos.Archivo{Nombre: valor_celda_nombre_archivo, Ruta: valor_celda_ruta_archivo}
+			slice_todos_disp = append(slice_todos_disp, archivo)
+
+		}
+
+	}
+
+	time.Sleep(time.Second * 1)
+	crearHoja("TODOS LOS DISPOSITIVOS")
+	time.Sleep(time.Second * 1)
+	setEstilos("TODOS LOS DISPOSITIVOS", &slice_todos_disp)
+	insertarInfoExcel("TODOS LOS DISPOSITIVOS", &slice_todos_disp)
+	time.Sleep(time.Second * 1)
+	slice_todos_disp = nil
 	archivo_excel.Save()
 	fmt.Print("\n\n¡EL ARCHIVO ESTÁ CREADO!\n\n")
 }
@@ -88,7 +132,7 @@ func setEstilos(nombre string, slice_archivos *[]rastreadorarchivos.Archivo) {
     {
         "freeze":true,
         "y_split":3,
-        "top_left_cell":"A5",
+        "top_left_cell":"A4",
         "active_pane":"bottomRight",
         "panes":[
             {"pane":"topLeft"},
@@ -187,7 +231,7 @@ func setEstilos(nombre string, slice_archivos *[]rastreadorarchivos.Archivo) {
 	
 	]`, red)
 
-	rango := fmt.Sprintf("A%d:A%d", 4, len(slice_todos_disp)+4)
+	rango := fmt.Sprintf("A%d:A%d", 4, len(*slice_archivos)+4)
 	if err := archivo_excel.SetConditionalFormat(nombre, rango, duplicCond); err != nil {
 
 		fmt.Println(err)
@@ -196,6 +240,14 @@ func setEstilos(nombre string, slice_archivos *[]rastreadorarchivos.Archivo) {
 	}
 
 	if archivo_excel.SetCellStyle(nombre, "A1", "B1", encabezado); err != nil {
+
+		fmt.Println(err)
+
+		return
+
+	}
+
+	if archivo_excel.SetCellStyle(nombre, "C2", "C2", encabezado); err != nil {
 
 		fmt.Println(err)
 
@@ -255,15 +307,15 @@ func insertarInfoExcel(nombre string, slice_archivos *[]rastreadorarchivos.Archi
 	archivo_excel.SetCellValue(nombre, "A3", "TÍTULO")
 	archivo_excel.SetCellValue(nombre, "B3", "RUTA (CARPETA)")
 	archivo_excel.MergeCell(nombre, "A2", "B2")
-	archivo_excel.SetCellValue(nombre, "A2", fmt.Sprintf("Total:%.2f GB    Usado:%.2f GB    Disponible:%.2f GB", valor_Total, valor_Usado, valor_Libre))
-	archivo_excel.SetCellValue(nombre, "C2", len(*slice_archivos))
+	archivo_excel.SetCellValue(nombre, "A2", fmt.Sprintf("Total: %.2f GB    Usado: %.2f GB    Disponible: %.2f GB", valor_Total, valor_Usado, valor_Libre))
+	archivo_excel.SetCellInt(nombre, "C2", len(*slice_archivos))
 	archivo_excel.SetCellValue("TODOS LOS DISPOSITIVOS", "A2", "LISTADO DE ARCHIVOS DE TODOS LOS MEDIOS DE ALMACENAMIENTO.")
 	for indice, archivo := range *slice_archivos {
 		col_a = fmt.Sprintf("A%d", indice+4)
 		col_b = fmt.Sprintf("B%d", indice+4)
 		archivo_excel.SetCellValue(nombre, col_a, strings.ToUpper(archivo.Nombre))
 		archivo_excel.SetCellValue(nombre, col_b, archivo.Ruta)
-		archivo_excel.SetRowHeight(nombre, indice, 20)
+		archivo_excel.SetRowHeight(nombre, indice+4, 20)
 	}
 
 	archivo_excel.SetRowHeight(nombre, 1, 25)
