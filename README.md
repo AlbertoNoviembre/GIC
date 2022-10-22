@@ -6,7 +6,7 @@ Generador de informes de contenido de dispositivos de almacenamiento en formato 
 DESCRIPCIÓN:
 ------------
 
-    El programa efectúa una exploración de dispositivos de almacenamiento externos, comprobando continuamente el
+El programa efectúa una exploración de dispositivos de almacenamiento externos, comprobando continuamente el
 estado de montaje/desmontaje de los mismos y genera un archivo de hoja de cálculo.
 en formato Excel, agregando hojas de libro de trabajo Excel por cada dispositivo de almacenamiento explorado.
 Estas hojas de libro de trabajo Excel contienen un listado de los nombres de los archivos y sus rutas, además
