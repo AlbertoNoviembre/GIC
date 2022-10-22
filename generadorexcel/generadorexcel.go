@@ -247,6 +247,14 @@ func setEstilos(nombre string, slice_archivos *[]rastreadorarchivos.Archivo) {
 
 	}
 
+	if archivo_excel.SetCellStyle(nombre, "C1", "C1", encabezado); err != nil {
+
+		fmt.Println(err)
+
+		return
+
+	}
+
 	if archivo_excel.SetCellStyle(nombre, "C2", "C2", encabezado); err != nil {
 
 		fmt.Println(err)
@@ -304,6 +312,7 @@ func insertarInfoExcel(nombre string, slice_archivos *[]rastreadorarchivos.Archi
 
 	archivo_excel.SetColWidth(nombre, "A", "A", 100)
 	archivo_excel.SetColWidth(nombre, "B", "B", 120)
+	archivo_excel.SetColWidth(nombre, "C", "C", 40)
 	archivo_excel.SetCellValue(nombre, "A3", "TÍTULO")
 	archivo_excel.SetCellValue(nombre, "B3", "RUTA (CARPETA)")
 	archivo_excel.MergeCell(nombre, "A2", "B2")
@@ -318,8 +327,10 @@ func insertarInfoExcel(nombre string, slice_archivos *[]rastreadorarchivos.Archi
 		archivo_excel.SetRowHeight(nombre, indice+4, 20)
 	}
 
+	archivo_excel.SetCellValue(nombre, "C1", "TOTAL ARCHIVOS")
 	archivo_excel.SetRowHeight(nombre, 1, 25)
 	archivo_excel.SetRowHeight(nombre, 2, 25)
 	archivo_excel.SetRowHeight(nombre, 3, 25)
+	archivo_excel.AutoFilter(nombre, "A3", "B3", `{"sort":"ascending"}`)
 
 }

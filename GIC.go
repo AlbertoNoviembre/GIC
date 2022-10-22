@@ -113,9 +113,10 @@ func main() {
 			if barra_de_progreso.Hidden {
 
 				btn_gExcel.Enable()
-
+				btn_gExcel.Text = "Generar Archivo EXCEL"
 			} else {
 
+				btn_gExcel.Text = "EXPLORANDO..."
 				btn_gExcel.Disable()
 
 			}
@@ -209,6 +210,10 @@ func main() {
 	lbl_controles.Move(fyne.NewPos(lbl_controles.MinSize().Width+250, 5))
 	lista.Move(fyne.NewPos(10, lbl_lista_disp.MinSize().Height+5))
 	lista.Resize(fyne.NewSize(241, 300))
+	cuadro_btn_gExcel := canvas.NewRectangle(color.White)
+	cuadro_btn_gExcel.Move(fyne.NewPos(260, lbl_controles.MinSize().Height+20))
+	cuadro_btn_gExcel.Resize(fyne.NewSize(200, 50))
+	cuadro_btn_gExcel.FillColor = color.White
 	btn_gExcel.Move(fyne.NewPos(260, lbl_controles.MinSize().Height+20))
 	btn_gExcel.Resize(fyne.NewSize(200, 50))
 	barra_de_progreso.Move(fyne.NewPos(10, 355))
