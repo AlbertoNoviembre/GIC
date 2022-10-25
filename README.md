@@ -13,6 +13,6 @@ de la información relativa al uso de los dispositivos (espacio total, espacio u
 asimismo, un formato condicional con rellenos y colores rojizos de las celdas cuyos nombres de archivo aparecen
 duplicados tras la exploración. 
 
-Una hoja creada de forma póstuma recoge el listado con los nombres y rutas de todos los dispositivos explorados,
+Finalmente, una hoja m recoge el listado con los nombres y rutas de todos los dispositivos explorados,
 aplicando el formato condicional y autofiltro correspondientes.
 
