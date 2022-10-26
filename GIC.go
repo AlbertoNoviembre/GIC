@@ -265,7 +265,7 @@ func getListaDispExter(canal chan []string) {
 
 				ruta = "/run/media/" + strings.ToLower(nombre_usuario)
 
-			} else if strings.Split(data, " ")[0] == "Ubuntu" {
+			} else {
 
 				ruta = "/media/" + strings.ToLower(nombre_usuario)
 

@@ -32,12 +32,12 @@ func EstablecerValoresUsoDisco(total, usado, libre float64) {
 
 func CrearArchivo(nombre string, slice_archivos *[]rastreadorarchivos.Archivo, usuario string) {
 
-	archivo_excel, err = excelize.OpenFile("/home/" + usuario + "/Escritorio" + "Contenido_Discos.xlsx")
+	archivo_excel, err = excelize.OpenFile("/home/" + usuario + "/Escritorio/" + "Contenido_Discos.xlsx")
 
 	if err != nil {
 
 		archivo_excel = excelize.NewFile()
-		archivo_excel.Path = "/home/" + usuario + "/Escritorio" + "Contenido_Discos.xlsx"
+		archivo_excel.Path = "/home/" + usuario + "/Escritorio/" + "Contenido_Discos.xlsx"
 	}
 
 	crearHoja(nombre)
