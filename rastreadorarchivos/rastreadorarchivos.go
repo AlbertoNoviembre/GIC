@@ -18,13 +18,14 @@ type Archivo struct {
 	Extension string
 }
 
-var archivo Archivo
+var Fich Archivo
 var Slice_archivos []Archivo
 var slice_ruta []string
 var slice_ruta_reducido []string
 var N_archivos int = 0
 var slice_formatos []string
 var Opc_tipos int
+var Canal_nombre_archivo chan string
 
 func (archivo Archivo) Agregar() {
 
@@ -85,21 +86,21 @@ func printFile(path string, info os.FileInfo, opc_tipos int, err error) error {
 					nombre_simp += string(caracter)
 				}
 
-				archivo.Indice = indice
+				Fich.Indice = indice
 			}
 
 			slice_ruta_reducido = slice_ruta[n_directorios_ruta_montados : len(slice_ruta)-1]
 
 			for _, elemento := range slice_ruta_reducido {
 
-				archivo.Ruta += string("/" + elemento)
+				Fich.Ruta += string("/" + elemento)
 
 			}
 
-			archivo.Nombre = string(nombre_simp)
-			archivo.Extension = filepath.Ext(path)
-			archivo.Agregar()
-			archivo.Ruta = ""
+			Fich.Nombre = string(nombre_simp)
+			Fich.Extension = filepath.Ext(path)
+			Fich.Agregar()
+			Fich.Ruta = ""
 
 		} else if opc_tipos == 1 {
 
@@ -107,14 +108,14 @@ func printFile(path string, info os.FileInfo, opc_tipos int, err error) error {
 
 			for _, elemento := range slice_ruta_reducido {
 
-				archivo.Ruta += string("/" + elemento)
+				Fich.Ruta += string("/" + elemento)
 
 			}
 
-			archivo.Nombre = string(nombre)
-			archivo.Extension = filepath.Ext(path)
-			archivo.Agregar()
-			archivo.Ruta = ""
+			Fich.Nombre = string(nombre)
+			Fich.Extension = filepath.Ext(path)
+			Fich.Agregar()
+			Fich.Ruta = ""
 
 		}
 

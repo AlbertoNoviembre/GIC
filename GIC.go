@@ -35,6 +35,7 @@ var disp_selec string
 var ruta_slice []string
 var progreso float64
 var infoDisco usodisco.EstadoDispAlmac
+var canal_nombres_archivo chan string
 
 func main() {
 
@@ -65,7 +66,21 @@ func main() {
 
 		})
 
-	btn_gpdf := widget.NewButton("Generar archivo PDF", func() {})
+	lbl_nombres_archivo := widget.NewLabel("")
+	lbl_nombres_archivo.Move(fyne.NewPos(10, 395))
+	lbl_nombres_archivo.Resize(fyne.NewSize(460, 35))
+	cuadro_lbl_nombres_archivo := canvas.NewRectangle(color.White)
+	cuadro_lbl_nombres_archivo.Move(fyne.NewPos(10, 395))
+	cuadro_lbl_nombres_archivo.Resize(fyne.NewSize(460, 35))
+	cuadro_lbl_nombres_archivo.FillColor = color.Transparent
+	cuadro_lbl_nombres_archivo.StrokeColor = color.RGBA{200, 100, 62, 1}
+	cuadro_lbl_nombres_archivo.StrokeWidth = 0.5
+
+	btn_gSQLite := widget.NewButton("Generar BD SQLite", func() {
+
+		dialog.Info("¡CUÁN TENTADOR ES PULSAR UN BOTÓN\nPARA VER SI 'SUENA LA FLAUTA'! ¿EH?\nPERO AÚN NO TIENE FUNCIONALIDAD.\nCOMO UN COCHE BONITO, PERO SIN MOTOR.\nJAJAJA.\nXD - ALBERTO -")
+		dialog.Info("DE MOMENTO NO PUEDES CREAR BASE DE DATOS SQLITE3,\nPERO SÍ UN LISTADO EXCEL.\nDISCULPA LAS MOLESTIAS. -ALBERTO-")
+	})
 
 	btn_gExcel := widget.NewButton("Generar archivo EXCEL", func() {
 
@@ -83,12 +98,23 @@ func main() {
 				progreso = float64(indice) / float64(len(rastreadorarchivos.Slice_archivos)-1)
 				barra_de_progreso.SetValue(progreso)
 
+				if len(archivo.Nombre) > 52 {
+
+					lbl_nombres_archivo.SetText("(Este nombre no se muestra por su longitud).")
+
+				} else {
+
+					lbl_nombres_archivo.SetText(archivo.Nombre)
+
+				}
+
 				if progreso > 0.98 {
 
 					progreso = 1.0
 				}
-
 			}
+
+			lbl_nombres_archivo.SetText("Nombres de archivo...")
 
 			generadorexcel.EstablecerValoresUsoDisco(float64(infoDisco.Total)/float64(usodisco.GB), float64(infoDisco.Usado)/float64(usodisco.GB), float64(infoDisco.Libre)/float64(usodisco.GB))
 			generadorexcel.CrearArchivo(disp_selec, &rastreadorarchivos.Slice_archivos, getNombreUsuario())
@@ -114,14 +140,18 @@ func main() {
 
 				btn_gExcel.Enable()
 				btn_gExcel.Text = "Generar Archivo EXCEL"
+				btn_gSQLite.Enable()
 			} else {
 
 				btn_gExcel.Text = "EXPLORANDO..."
 				btn_gExcel.Disable()
-
+				btn_gSQLite.Disable()
 			}
 			data.Reload()
+			btn_gExcel.Refresh()
+			btn_gSQLite.Refresh()
 		}
+
 	}()
 
 	btn_limpiar_narch := widget.NewButton("Limpiar nombres de archivos", func() {
@@ -175,7 +205,7 @@ func main() {
 
 	lbl_controles := widget.NewLabel("CONTROLES:")
 	lbl_controles.Alignment = fyne.TextAlign(1)
-	btn_gpdf.Disable()
+	btn_gSQLite.Enable()
 	btn_limpiar_narch.Disable()
 
 	cuadro_lista := canvas.NewRectangle(color.White)
@@ -192,38 +222,43 @@ func main() {
 	cuadro_controles.StrokeColor = color.White
 	cuadro_controles.StrokeWidth = 0.5
 
+	barra_de_progreso.Move(fyne.NewPos(10, 350))
+	barra_de_progreso.Resize(fyne.NewSize(460, 35))
 	cuadro_progreso := canvas.NewRectangle(color.White)
-	cuadro_progreso.Move(fyne.NewPos(10, 355))
+	cuadro_progreso.Move(fyne.NewPos(10, 350))
 	cuadro_progreso.Resize(fyne.NewSize(460, 35))
 	cuadro_progreso.FillColor = color.Transparent
-	cuadro_progreso.StrokeColor = color.White
+	cuadro_progreso.StrokeColor = color.RGBA{0, 200, 0, 1}
 	cuadro_progreso.StrokeWidth = 0.5
 
-	radbox_tipos_archivo.Move(fyne.NewPos(265, 115))
+	radbox_tipos_archivo.Move(fyne.NewPos(265, 150))
 	radbox_tipos_archivo.Resize(fyne.NewSize(200, 100))
 
 	contenido := container.NewWithoutLayout(cuadro_lista, cuadro_controles, cuadro_progreso, lbl_lista_disp,
-		lbl_controles, radbox_tipos_archivo, barra_de_progreso, btn_gExcel, lista,
-		btn_salir)
+		lbl_controles, radbox_tipos_archivo, barra_de_progreso, btn_gExcel, btn_gSQLite, lista,
+		btn_salir, lbl_nombres_archivo, cuadro_lbl_nombres_archivo)
 
 	lbl_lista_disp.Move(fyne.NewPos(129, 5))
 	lbl_controles.Move(fyne.NewPos(lbl_controles.MinSize().Width+250, 5))
 	lista.Move(fyne.NewPos(10, lbl_lista_disp.MinSize().Height+5))
 	lista.Resize(fyne.NewSize(241, 300))
+
+	btn_gExcel.Move(fyne.NewPos(260, lbl_controles.MinSize().Height+10))
+	btn_gExcel.Resize(fyne.NewSize(200, 50))
 	cuadro_btn_gExcel := canvas.NewRectangle(color.White)
-	cuadro_btn_gExcel.Move(fyne.NewPos(260, lbl_controles.MinSize().Height+20))
+	cuadro_btn_gExcel.Move(fyne.NewPos(260, lbl_controles.MinSize().Height+100))
 	cuadro_btn_gExcel.Resize(fyne.NewSize(200, 50))
 	cuadro_btn_gExcel.FillColor = color.White
-	btn_gExcel.Move(fyne.NewPos(260, lbl_controles.MinSize().Height+20))
-	btn_gExcel.Resize(fyne.NewSize(200, 50))
-	barra_de_progreso.Move(fyne.NewPos(10, 355))
-	barra_de_progreso.Resize(fyne.NewSize(460, 35))
-	btn_salir.Move(fyne.NewPos(260, btn_gExcel.MinSize().Height+245))
-	btn_salir.Resize(fyne.NewSize(200, 50))
+
+	btn_gSQLite.Move(fyne.NewPos(260, btn_gExcel.Position().Y+btn_gExcel.MinSize().Height+20))
+	btn_gSQLite.Resize(fyne.NewSize(200, 50))
+
+	btn_salir.Move(fyne.NewPos(260, btn_gExcel.MinSize().Height+260))
+	btn_salir.Resize(fyne.NewSize(200, 35))
 
 	w.SetContent(contenido)
 
-	w.Resize(fyne.NewSize(489, 400))
+	w.Resize(fyne.NewSize(489, 450))
 	w.SetFixedSize(true)
 	w.ShowAndRun()
 	w.Content().Refresh()
