@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	fyne.io/fyne/v2 v2.2.3
+	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/xuri/excelize/v2 v2.6.1
 	github.com/zcalusic/sysinfo v0.9.5
 )

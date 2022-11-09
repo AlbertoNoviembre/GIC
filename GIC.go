@@ -18,9 +18,11 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/AlbertoNoviembre/GIC/generadorSQLite"
 	"github.com/AlbertoNoviembre/GIC/generadorexcel"
 	"github.com/AlbertoNoviembre/GIC/rastreadorarchivos"
 	"github.com/AlbertoNoviembre/GIC/usodisco"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/tawesoft/golib/v2/dialog"
 	"github.com/zcalusic/sysinfo"
 )
@@ -78,8 +80,8 @@ func main() {
 
 	btn_gSQLite := widget.NewButton("Generar BD SQLite", func() {
 
-		dialog.Info("¡CUÁN TENTADOR ES PULSAR UN BOTÓN\nPARA VER SI 'SUENA LA FLAUTA'! ¿EH?\nPERO AÚN NO TIENE FUNCIONALIDAD.\nCOMO UN COCHE BONITO, PERO SIN MOTOR.\nJAJAJA.\nXD - ALBERTO -")
-		dialog.Info("DE MOMENTO NO PUEDES CREAR BASE DE DATOS SQLITE3,\nPERO SÍ UN LISTADO EXCEL.\nDISCULPA LAS MOLESTIAS. -ALBERTO-")
+		go generarBDSQLite()
+
 	})
 
 	btn_gExcel := widget.NewButton("Generar archivo EXCEL", func() {
@@ -136,17 +138,20 @@ func main() {
 
 			disps = <-canal
 			fmt.Printf("Hay %d dispositivos montados.\n", len(disps))
+
 			if barra_de_progreso.Hidden {
 
 				btn_gExcel.Enable()
 				btn_gExcel.Text = "Generar Archivo EXCEL"
 				btn_gSQLite.Enable()
+
 			} else {
 
 				btn_gExcel.Text = "EXPLORANDO..."
 				btn_gExcel.Disable()
 				btn_gSQLite.Disable()
 			}
+
 			data.Reload()
 			btn_gExcel.Refresh()
 			btn_gSQLite.Refresh()
@@ -187,7 +192,6 @@ func main() {
 	radbox_tipos_archivo.SetSelected("Todos los archivos")
 
 	btn_salir := widget.NewButton("Salir", func() { os.Exit(0) })
-
 	btn_gExcel.Disable()
 
 	lista.OnSelected = func(id int) {
@@ -265,6 +269,54 @@ func main() {
 
 }
 
+func contiene(elementos []generadorSQLite.Dispositivo, valor string) bool {
+
+	var locontiene bool
+
+	for _, s := range elementos {
+
+		if valor == s.Nombre {
+
+			locontiene = true
+			break
+
+		} else {
+
+			locontiene = false
+
+		}
+
+	}
+
+	return locontiene
+}
+
+func generarBDSQLite() {
+
+	generadorSQLite.CrearDB()
+	time.Sleep(time.Second * 1)
+
+	if !contiene(generadorSQLite.GetDispositivosRegistrados(), disp_selec) {
+
+		generadorSQLite.Insertar("DispositivosAlmac", disp_selec, float64(infoDisco.Total)/float64(usodisco.GB), float64(infoDisco.Usado)/float64(usodisco.GB), float64(infoDisco.Libre)/float64(usodisco.GB))
+
+	} else {
+
+		generadorSQLite.Actualizar("DispositivosAlmac", disp_selec, float64(infoDisco.Total)/float64(usodisco.GB), float64(infoDisco.Usado)/float64(usodisco.GB), float64(infoDisco.Libre)/float64(usodisco.GB))
+
+	}
+
+	for _, registro := range generadorSQLite.GetDispositivosRegistrados() {
+
+		fmt.Println(registro.Nombre)
+		fmt.Printf("Capacidad Total: %.2f GB\n", registro.Total)
+		fmt.Printf("Espacio Utilizado: %.2f GB\n", registro.Utilizado)
+		fmt.Printf("Espacio Disponible: %.2f GB\n", registro.Disponible)
+
+	}
+
+}
+
 func getListaDispExter(canal chan []string) {
 
 	var slice_disp_extern []string
@@ -302,7 +354,7 @@ func getListaDispExter(canal chan []string) {
 
 			} else {
 
-				ruta = "/media/" + strings.ToLower(nombre_usuario)
+				ruta = "/run/media/" + strings.ToLower(nombre_usuario)
 
 			}
 			//ruta = "/media/"
